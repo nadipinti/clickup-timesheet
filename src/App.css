@@ -1,0 +1,96 @@
+/* .App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.color{
+  background-color: #282c34;
+
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 1vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+} */
+.react-datepicker-wrapper {
+  width:40% !important;
+}
+.date_container {
+  display: flex;
+}
+input {
+  border-radius: 8px;
+  height:40px;
+  background-color: #ffffff;
+  color: #0f56b3;
+  border: 1px solid #c0c0c0;
+  font-family: "Manrope", sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 150%;
+}
+.header {
+  display: flex;
+  align-items: center;
+}
+.fc-select-group > * {
+  margin: 0.5rem;
+}
+.filter_select_option {
+  border-radius: 8px;
+  box-sizing: border-box;
+  border-width: 1px;
+  min-width: 150px;
+  height: 40px;
+  padding: 5px 5px;
+  margin: 0.2rem;
+  background-color: #ffffff;
+  color: #0f56b3;
+  border: 1px solid #c0c0c0;
+  font-family: "Manrope", sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 150%;
+}
+.employee_name {
+  font-size: x-large;
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+.signature {
+  margin-top: 60px;
+}
