@@ -12,13 +12,14 @@ import Spinner from 'react-bootstrap/Spinner';
 
 
 
+
 function App() {
   const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+  const [endDate, setEndDate] = useState(new Date(Date.now() + 6 * 24 * 60 * 60 * 1000));
   const [userdata, setUserdata] = useState([]);
   const [projects, setProjects] = useState([]);
   const [selectedUser, setSelectedUser] = useState({ id: 0, name: "" });
-  const [selectedproject, setSelectedproject] = useState({ id: 0, name: "" });
+  const [selectedproject, setSelectedproject] = useState({ id: "All", name: "" });
   const [no_of_dates, setNo_of_dates] = useState([]);
   const [days, setDays] = useState([]);
   const [taskData, setTaskData] = useState([]);
@@ -41,7 +42,7 @@ function App() {
 
   //to get all users
   const getUsers = () => {
-    axios.get("http://ec2-13-233-207-203.ap-south-1.compute.amazonaws.com:3000/clickup/team")
+    axios.get("https://1jj6tw32yb.execute-api.ap-south-1.amazonaws.com/dev/app/team")
       .then((data) => {
         setUserdata(data.data.teams[0].members)
       })
@@ -52,7 +53,7 @@ function App() {
 
   //to get all projects
   const getProjects = () => {
-    axios.get("http://ec2-13-233-207-203.ap-south-1.compute.amazonaws.com:3000/clickup/folder")
+    axios.get("https://1jj6tw32yb.execute-api.ap-south-1.amazonaws.com/dev/app/folder")
       .then((data) => {
         setProjects(data.data.folders)
       })
@@ -65,7 +66,7 @@ function App() {
     var arr = new Array();
     var day = [];
     var dt = new Date(start);
-    while (dt <= end - 1) {
+    while (dt <= end) {
       arr.push({ dates: moment(dt).format("DD-MM"), day: moment(dt).format("dddd").substring(0, 3) });
       dt.setDate(dt.getDate() + 1);
     }
@@ -88,8 +89,16 @@ function App() {
     })
 
   useEffect(() => {
-    let days = 7
-    setEndDate(startDate.getTime() + (days * 24 * 60 * 60 * 1000))
+    let days = 6
+    startDate.setHours(0);
+    startDate.setMinutes(0);
+    startDate.setSeconds(0);
+    var enddate = new Date(startDate.getTime() + (days * 24 * 60 * 60 * 1000))
+    enddate.setHours(23);
+    enddate.setMinutes(59);
+    enddate.setSeconds(59);
+
+    setEndDate(enddate.getTime())
 
   }, [startDate])
 
@@ -100,23 +109,36 @@ function App() {
   // this function calls when user clicks on submit button 
   const SubmitDates = () => {
     let filterTasks = [];
+    startDate.setHours(0);
+    startDate.setMinutes(0);
+    startDate.setSeconds(0);
+
     let st_date = startDate.getTime();
     let total_Hours = 0;
     setLoader(true);
+    console.log(selectedproject);
+    var query = "start_date=" + st_date + "&end_date=" + endDate + "&assignee=" + selectedUser.id + "&include_location_names=true" + "&folder_id=" +  selectedproject.id;
+    if(selectedproject.id == "All") {
 
-      
-    axios.get("http://ec2-13-233-207-203.ap-south-1.compute.amazonaws.com:3000/clickup/time_entries?start_date=" + st_date + "&end_date=" + endDate + "&assignee=" + selectedUser.id)
+      // query = query + "&folder_id=" + Object.values(selectedproject)
+      query = "start_date=" + st_date + "&end_date=" + endDate + "&assignee=" + selectedUser.id + "&include_location_names=true" ;
+    }
+    axios.get("https://1jj6tw32yb.execute-api.ap-south-1.amazonaws.com/dev/app/time_entries?"+query)
       .then((data) => {
-        console.log(data.data.data);
         setLoader(false);
         const finalArray = [];
         const final_Array = [];
         
         const requiredData = data.data.data.map((iteam) => {
-          console.log(iteam)
+          let convertToDate= new Date(parseInt(iteam.start)).toString("DD-MM")
+          let requiredDateFormat = moment(convertToDate).format("DD-MM");
           return {
             task: iteam.task?.name,
-            date: new Date(parseInt(iteam.start)).toLocaleDateString(),
+            customId : iteam.task?.custom_id,
+            taskURL : iteam?.task_url,
+            projectName : iteam?.task_location?.folder_name,
+            taskStatus : iteam.task?.status?.status,
+            date: requiredDateFormat,
             duration: (iteam.duration / (1000 * 60 * 60)).toFixed(1),
           };
         });
@@ -184,7 +206,7 @@ function App() {
           no_of_dates.map((date, id) => {
 
 
-            if (moment(data.date).format('DD-MM') == date.dates) {
+            if (data.date== date.dates) {
               // console.log(date.dates,data.duration)
               dates_duration.push({ [date.dates]: data.duration })
               total_taskhours = Number(total_taskhours) + Number(data.duration);
@@ -256,7 +278,7 @@ function App() {
         total_data.map((data, idx) => {
           totalhours = 0;
           no_of_dates.map((date, id) => {
-            if (moment(data.date).format('DD-MM') == date.dates) {
+            if (data.date == date.dates) {
               data.dur.map((hours, i) => {
                 totalhours = Number(totalhours) + Number(Object.values(hours));
               })
@@ -295,16 +317,15 @@ function App() {
   const print = () => {
     window.print();
   }
-console.log(totalHours_perDate)
+// console.log(totalHours_perDate)
+// useEffect(() => {
+//   SubmitDates();
+// },[startDate])
   return (
     <div className='container'>
-
-
-      <Container fluid className='header mb-5'>
-        <div className='date_container'>Start Date :
-
-        </div>
-        {/* <Col > */}
+      <Container fluid className='header mb-5 d-flex'>
+        <div className='date_container d-flex2'>
+          <label>Start Date</label>
           <DatePicker
             dateFormat="dd/MM/yyyy"
             selected={startDate}
@@ -312,83 +333,65 @@ console.log(totalHours_perDate)
             filterDate={date => date.getDay(date) === 1}
             placeholderText="Select a Monday"
           />
-        {/* </Col> */}
-        <select
-          onChange={handleOccupancy}
-          name=""
-          id=""
-          className="fc-select-group filter_select_option"
-        >
-          <option >Select User</option>
-          {userdata && userdata.map((variant) => {
-            return <option value={variant.user.id}>{variant.user.username}</option>
-
-          })}
-          
-
-        </select>
-        <select
-          onChange={handleProject}
-          name=""
-          id=""
-          className="fc-select-group filter_select_option"
-        >
-          <option >Select Project</option>
-          {projects && projects.map((variant) => {
-            return <option value={variant.id}>{variant.name}</option>
-
-          })}
-
-        </select>
-        <Button onClick={SubmitDates}>Submit</Button>
-        <Button onClick={print} className="ms-5" >Print</Button>
+        </div> 
+        <div className='date_container d-flex2'>
+          <select onChange={handleOccupancy} className="fc-select-group filter_select_option">
+            <option >Select User</option>
+            {userdata && userdata.map((variant) => {return <option value={variant.user.id}>{variant.user.username}</option>})}
+          </select>
+          <select onChange={handleProject} className="fc-select-group filter_select_option">
+            <option value="All">All</option>
+            {projects && projects.map((variant) => {return <option value={variant.id}>{variant.name}</option>})}
+          </select>
+          <Button className='btn-success' onClick={SubmitDates}>Submit</Button>
+          <Button className='btn-primary' onClick={print}>Print</Button>
+          {/* <Button className='btn-info' onClick={print}>Download</Button> */}
+        </div>        
       </Container>
     
-{loader &&   <div className="spinner-border text-primary" style={{width: "5rem", height: "5rem", marginLeft:"50%", marginTop : "10%"}} role="status">
+{loader && <div className="spinner-border text-primary" style={{width: "5rem", height: "5rem", marginLeft:"50%", marginTop : "10%"}} role="status">
 
 </div>}
-     {!loader &&  <table className='table table-bordered table-striped'>
+     {!loader &&  <table className='table table-striped t-cust table_cust'>
         <thead>
-
           <tr>
+            <th>Task ID</th>
+            <th>Project Name</th>
             <th>Task</th>
-
             {no_of_dates && no_of_dates.map((dates, id) => {
-
               return (
                 <th>
-                  {dates.dates} <br />
-                  {dates.day}
-
+                 <div className='date-th'>
+                 {dates.dates}<span>{dates.day}</span>
+                 </div>
                 </th>)
             })
-
             }
             <th>Total hours</th>
           </tr>
-
         </thead>
         <tbody>
           {tasks && tasks.map((data, id) => {
-
             return (
               <tr>
-                <td>{data.task} </td>
+                <td><a className="customid" href={data.taskURL}>{data.customId}</a></td>
+                <td><p>{data.projectName}</p></td>
+                <td><p>{data.task}  ({data.taskStatus})</p> </td>
                 {data.dur.map((items, id) => {
                   return (
-                    <td>{Object.values(items)}</td>
+                    <td>{Number(Object.values(items)) == 0 ? "-" : Number(Object.values(items)).toFixed(2) }</td>
                   )
                 })}
-
               </tr>
             )
           })}
           <tr>
+            <td></td>
+            <td></td>
             <td style={{ float: "right" }}>Total</td>
             {totalHours_perDate.map((data, i) => {
               return (
                 <td>{Number(Object.values(data)).toFixed(2)}</td>
-
               )
             })}
           </tr>

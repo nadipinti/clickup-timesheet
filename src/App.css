@@ -94,3 +94,27 @@ table, th, td {
 .signature {
   margin-top: 60px;
 }
+.customid {
+  text-decoration: none;
+}
+.date-th{  
+  line-height: 18px;
+  white-space: nowrap;
+
+}
+.date-th span{
+  display: block;
+  font-weight: 500;
+  font-size: 13px;
+}
+tbody, td, tfoot, th, thead, tr{line-height: normal;}
+.t-cust thead tr th:first-child,
+.t-cust tbody tr td:first-child{min-width: 90px;white-space:nowrap;}
+.t-cust thead tr th:nth-child(2),
+.t-cust tbody tr td:nth-child(2){min-width: 90px;white-space:nowrap;}
+.ml-r-3{
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+.d-flex{display: flex;align-items: center;justify-content: space-between;gap: 1rem;padding:1rem 0;}
+.d-flex2{display: flex;align-items: center;gap: 1rem}
